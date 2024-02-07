@@ -1,3 +1,4 @@
+//Time Complexity:O(n*logn)
 #include<bits/stdc++.h>
 using namespace std;
 int main(){
@@ -10,6 +11,9 @@ int main(){
     int k;
     cin>>k;
     sort(nums,nums+n);
+    if(k>0 && k<n){
     cout<<nums[n-k];
+    }
+    else{cout<<"Error: k is out of bounds";}
     return 0;
 }
