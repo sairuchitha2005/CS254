@@ -3,21 +3,21 @@ using namespace std;
 
 bool is_bi(vector<vector<bool>> v){
 	int n=v.size();
-	vector<int> col(n,0);
+	vector<int> col(n,-1);
 	queue<int> q;
-	q.push(0);
-	col[0]=1;
+	q.push(0); 
+	col[0]=0;
 	while(!q.empty()){
 		int k=q.front();
 		q.pop();
 		for(int i=0;i<n;i++){
 			if(v[i][k]==1){
-				if(col[k]==1){
-					if(col[i]==0){col[i]=2;q.push(i);}
-					else if(col[i]==1){return 0;}
+				if(col[k]==0){
+					if(col[i]==-1){col[i]=1;q.push(i);}
+					else if(col[i]==0){return 0;}
 				}else{
-					if(col[i]==0){col[i]=1;q.push(i);}
-					else if(col[i]==2){return 0;}
+					if(col[i]==-1){col[i]=0;q.push(i);}
+					else if(col[i]==1){return 0;}
 				}
 			}
 		}

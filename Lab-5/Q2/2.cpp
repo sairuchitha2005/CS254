@@ -17,7 +17,8 @@ int BFS(int move[],int n)
     pair<int,int> p;
     while (!q.empty()) {
         p = q.front();
-        int k = p.first; 
+        int k = p.first;  
+        
         if (k==n-1){break;}
 
         q.pop();
