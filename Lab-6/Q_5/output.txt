@@ -1,0 +1,4 @@
+Articulation Points:
+1 
+Bridges:
+(1,2) 
