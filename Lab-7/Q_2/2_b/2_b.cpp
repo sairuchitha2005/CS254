@@ -1,56 +1,65 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
-#define ll long long
-#define ld long double
-#define pb push_back
-#define mp make_pair
+struct Job {
 
-struct Compare {
-    bool operator()(const pair<ll, pair<ll, ll>>& a, const pair<ll, pair<ll, ll>>& b) {
-        return a.second.first < b.second.first;
-    }
+	char id; 
+	int dead;
+	int profit; 
 };
 
-int main(){
+struct jobProfit {
+	bool operator()(Job const& a, Job const& b)
+	{
+		return (a.profit < b.profit);
+	}
+};
 
+void printJobScheduling(Job arr[], int n)
+{
+	vector<Job> result;
+	sort(arr, arr + n,
+		[](Job a, Job b) { return a.dead < b.dead; });
+	priority_queue<Job, vector<Job>, jobProfit> pq;
+
+	for (int i = n - 1; i >= 0; i--) {
+		int slot_available;
+		if (i == 0) {
+			slot_available = arr[i].dead;
+		}
+		else {
+			slot_available = arr[i].dead - arr[i - 1].dead;
+		}
+		pq.push(arr[i]);
+	
+		while (slot_available > 0 && pq.size() > 0) {
+			Job job = pq.top();
+			pq.pop();
+			slot_available--;
+			result.push_back(job);
+		}
+	}
+	
+	sort(result.begin(), result.end(),
+		[&](Job a, Job b) { return a.dead < b.dead; });
+	
+	for (int i = 0; i < result.size(); i++)
+		cout << result[i].id << ' ';
+	cout << endl;
+}
+
+
+int main()
+{
     freopen("input.txt","r",stdin);
     freopen("output.txt","w",stdout);
-    ll n;cin>>n;
-    priority_queue<pair<ll,pair<ll,ll>>,vector<pair<ll,pair<ll,ll>>>,Compare>pq;
-
-    ll max_deadline=-1;
-    vector<pair<ll,pair<ll,ll>>>v;//vector of {dead_line,{profit,id}}
-    for(ll i=0;i<n;i++){
-        ll id,dead,profit;
-        cin>>id>>dead>>profit;
-        v.pb({dead,{profit,id}});
-        max_deadline=max(max_deadline,dead);
+   int n;
+    cin >> n;
+    Job arr[n];
+    for (int i = 0; i < n; ++i) {
+        cin >> arr[i].id >> arr[i].dead >> arr[i].profit;
     }
-        //pq.push({profit,{dead,id}});
-    sort(v.begin(),v.end());
-    //vector<bool>slot(max_deadline,0);
-    ll ans=0;
-    vector<ll>sequence;
-
-    for(ll i=n-1;i>=0;i--){
-        int slots_available = v[i].first;
-        if(i>0) slots_available -= v[i-1].first;
-        pq.push(v[i]);
-        while(!pq.empty()&&slots_available>0){
-            slots_available--;
-            auto y=pq.top();
-            pq.pop();
-            sequence.pb(y.second.second);
-            ans+=y.second.first;
-        }
-    }
-
-    cout<<"profit "<<ans<<endl;
-    reverse(sequence.begin(),sequence.end());
-    cout<<"sequence ";
-    for(auto x:sequence)cout<<x<<" ";
-    cout<<endl;
-    return 0;
-    //optimal greedy solution
-    //Time Complexity=O(NlogN)
+	cout << "Following is maximum profit sequence of jobs "
+			"\n";
+	printJobScheduling(arr, n);
+	return 0;
 }

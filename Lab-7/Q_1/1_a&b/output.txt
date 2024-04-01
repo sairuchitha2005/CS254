@@ -1,1 +1,2 @@
-18543
+Maximum value: 35
+Included items: 0 1 2 
