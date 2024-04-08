@@ -1,68 +1,51 @@
-#include <bits/stdc++.h>
-using namespace std;
+    #include <bits/stdc++.h>
+    using namespace std;
+    #define ll long long
 
-vector<int> shortestAlternatingPaths(int n, vector<vector<int>>& redEdges, vector<vector<int>>& blueEdges) {
-        vector<int> ans(n, -1);
-        vector<vector<vector<int>>> graph(2, vector<vector<int>>(n));
-        for(vector<int>& rE: redEdges)
-            graph[0][rE[0]].push_back(rE[1]);
-        for(vector<int>& bE: blueEdges)
-            graph[1][bE[0]].push_back(bE[1]);
-        queue<pair<int, bool>> q;
-        q.push({0, true});
-        q.push({0, false});
-        int path = 0, size , u;
-        bool col;
-        vector<vector<bool>> visited(2, vector<bool>(n, false));
-        while(!q.empty()) {
-            size = q.size();
-            while(size--) {
-                u = q.front().first;
-                col = q.front().second;
-                q.pop();
-                if(visited[col][u])
-                    continue;
-                visited[col][u] = true;
-                if(ans[u] == -1)
-                    ans[u] = path;
-                for(int v: graph[!col][u])
-                    if(!visited[!col][v])
-                        q.push({v, !col});
-            }
-            path++;
+    ll minCost(ll n, ll m, ll mask, ll prev, ll color,vector<vector<pair<ll,ll>>> &graph,vector<vector<pair<ll,ll>>> &dp)
+    {
+        if (mask == ((1 << n) - 1))
+            return 0; 
+        if(color == 0 && dp[mask][prev].first != 0) 
+            return dp[mask][prev].first; 
+        if(color == 1 && dp[mask][prev].second != 0) 
+            return dp[mask][prev].second; 
+        ll ans = INT_MAX;   
+        for (ll i = 0; i < n; i++)
+        {
+            if(color == 1 && graph[prev][i].first && !(mask & (1<<i)))
+                ans = min(ans, graph[prev][i].first + minCost(n,m,mask|(1<<i),i,0,graph,dp)); 
+            if(color == 0 && graph[prev][i].second && !(mask & (1<<i)))
+                ans = min(ans, graph[prev][i].second + minCost(n,m,mask|(1<<i),i,1,graph,dp)); 
         }
-        return ans;
+        if(color == 0)
+            return dp[mask][prev].first = ans;
+        else 
+            return dp[mask][prev].second = ans;
     }
 
-int main() {
-    freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
-
-    int n;
-    cin >> n; // Read the number of nodes
-    
-    int red_edge_count;
-    cin >> red_edge_count; // Read the number of red edges
-    vector<vector<int>> red_edges(red_edge_count, vector<int>(2));
-    for (int i = 0; i < red_edge_count; ++i) {
-        cin >> red_edges[i][0] >> red_edges[i][1]; // Read red edges
+    int main()
+    {
+        freopen("input.txt","r",stdin); 
+        freopen("output.txt","w",stdout); 
+        ll n,m; cin>>n>>m; 
+        vector<vector<pair<ll,ll>>> graph(n,vector<pair<ll,ll>>(n)); 
+        vector<vector<pair<ll,ll>>> dp(1<<n,vector<pair<ll,ll>>(n)); 
+        for(ll i = 0; i < m; i++)
+        {
+            ll u,v,color,w; 
+            cin>>u>>v>>color>>w;
+            u--,v--;
+            if(color == 0)
+                graph[u][v].first = graph[v][u].first = w; 
+            else
+                graph[u][v].second = graph[v][u].second = w; 
+        }
+        ll ans = INT_MAX; 
+        for(ll i = 0; i < n; i++)
+        {
+            ans = min(ans, minCost(n,m,1<<i,i,0,graph,dp)); 
+        }
+        if(ans == INT_MAX) ans = -1; 
+        cout<<ans<<"\n"; 
     }
-    
-    int blue_edge_count;
-    cin >> blue_edge_count; // Read the number of blue edges
-    vector<vector<int>> blue_edges(blue_edge_count, vector<int>(2));
-    for (int i = 0; i < blue_edge_count; ++i) {
-        cin >> blue_edges[i][0] >> blue_edges[i][1]; // Read blue edges
-    }
-
-    vector<int> result = shortestAlternatingPaths(n, red_edges, blue_edges);
-
-    // Output the result
-    cout << "Shortest alternating paths: ";
-    for (int i = 0; i < result.size(); ++i) {
-        cout << result[i] << " ";
-    }
-    cout << endl;
-
-    return 0;
-}

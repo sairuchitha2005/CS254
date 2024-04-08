@@ -1,123 +1,85 @@
-// C++ program for the above approach 
+# include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define vi vector<ll>
 
-#include <bits/stdc++.h> 
-using namespace std; 
+//initialize vectors
+vi parent;
+vi set_size;
+void make(ll v)
+{
+    parent[v] = v;
+    set_size[v] = 1;
+}
 
-// DSU data structure 
-// path compression + rank by union 
-class DSU { 
-	int* parent; 
-	int* rank; 
+ll find_par(ll v)
+{
+    if(parent[v] == v) return v;
+    else return parent[v] = find_par(parent[v]);
+}
 
-public: 
-	DSU(int n) 
-	{ 
-		parent = new int[n]; 
-		rank = new int[n]; 
+void union_set(ll a, ll b)
+{
+    a = find_par(a);
+    b = find_par(b);
+    if(a!=b)
+    {
+        if(set_size[a] < set_size[b]) swap(a,b);
+        parent[b] = a;
+        set_size[a] += set_size[b];
+    }
+}    
+int main(){
 
-		for (int i = 0; i < n; i++) { 
-			parent[i] = -1; 
-			rank[i] = 1; 
-		} 
-	} 
+    freopen("input.txt","r",stdin); 
+    freopen("output.txt","w",stdout);
 
-	// Find function 
-	int find(int i) 
-	{ 
-		if (parent[i] == -1) 
-			return i; 
+    //creating a vector to store the edges and weights in the form 
+    //weight,{node1,node2}
+    ll n;cin>>n;
+    ll e;cin>>e;
 
-		return parent[i] = find(parent[i]); 
-	} 
+    vector<pair<pair<ll,ll>,ll>>edges;
+    parent.assign(n,-1);
+    set_size.assign(n,0);
 
-	// Union function 
-	void unite(int x, int y) 
-	{ 
-		int s1 = find(x); 
-		int s2 = find(y); 
-
-		if (s1 != s2) { 
-			if (rank[s1] < rank[s2]) { 
-				parent[s1] = s2; 
-			} 
-			else if (rank[s1] > rank[s2]) { 
-				parent[s2] = s1; 
-			} 
-			else { 
-				parent[s2] = s1; 
-				rank[s1] += 1; 
-			} 
-		} 
-	} 
-}; 
-
-class Graph { 
-	vector<vector<int> > edgelist; 
-	int V; 
-
-public: 
-	Graph(int V) { this->V = V; } 
-
-	// Function to add edge in a graph 
-	void addEdge(int x, int y, int w) 
-	{ 
-		edgelist.push_back({ w, x, y }); 
-	} 
-
-	void kruskals_mst() 
-	{ 
-		// Sort all edges 
-		sort(edgelist.begin(), edgelist.end()); 
-
-		// Initialize the DSU 
-		DSU s(V); 
-		int ans = 0; 
-		cout << "Following are the edges in the "
-				"constructed MST"
-			<< endl; 
-		for (auto edge : edgelist) { 
-			int w = edge[0]; 
-			int x = edge[1]; 
-			int y = edge[2]; 
-
-			// Take this edge in MST if it does 
-			// not forms a cycle 
-			if (s.find(x) != s.find(y)) { 
-				s.unite(x, y); 
-				ans += w; 
-				cout << x << " -- " << y << " == " << w 
-					<< endl; 
-			} 
-		} 
-		cout << "Minimum Cost Spanning Tree: " << ans; 
-	} 
-}; 
-
-// Driver code 
-int main() 
-{ 
-    freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
-
-    int V; // Number of vertices
-    cin >> V;
-
-    vector<vector<int>> edgelist;
-    int w, x, y;
-    while (cin >> w >> x >> y) {
-        edgelist.push_back({w, x, y});
+    for(ll i=0;i<e;i++){
+        ll u,v,w;
+        cin>>u>>v>>w;
+        edges.push_back({{u-1,v-1},w});
+    }
+    sort(edges.begin(),edges.end(),[](auto left, auto right){
+        return left.second>right.second;
+    });
+    
+    //assigning a parent element to each set
+    for(ll i=0;i<n;i++){
+        //setting the parent to  itself initially
+        make(i);
     }
 
-    Graph g(V);
-    for (auto edge : edgelist) {
-        int w = edge[0];
-        int x = edge[1];
-        int y = edge[2];
-        g.addEdge(x, y, w);
+    //storing the final set of edges and their weights in the vector
+    vector<pair<pair<ll,ll>,ll>>edges_final;
+    for(auto x:edges){
+        ll weight=x.second;
+        ll a=(x.first).first;
+        ll b=(x.first).second;
+        // if a cycle gets created while adding the current edge then parent[a]=parent[b]
+        //if a and b have different parents, then the corresponding edge will be considered
+        if(find_par(a)!=find_par(b)){
+            union_set(a,b);
+            edges_final.push_back(x);
+        }     
     }
 
-    // Function call 
-    g.kruskals_mst(); 
+    ll cost=0;
 
-    return 0; 
+    //printing the edges along with their weights in th MST
+    cout<<"Maximum Spanning Tree after applying Kruskal's algorithm: "<<endl;
+    for(auto x: edges_final){
+        //printing order:- node1 , node2 , weight
+        cout<<(x.first).first<<" "<<(x.first).second<<" "<<(x.second)<<endl;
+        cost+=(x.second);
+    }
+    cout<<"The cost of MST: "<<cost<<endl;
 }
